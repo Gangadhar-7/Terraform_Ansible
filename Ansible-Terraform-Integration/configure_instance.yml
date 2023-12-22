@@ -1,0 +1,14 @@
+---
+- name: Configure Ubuntu Server
+  hosts: example_instances
+  become: true
+  tasks:
+    - name: Update packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
