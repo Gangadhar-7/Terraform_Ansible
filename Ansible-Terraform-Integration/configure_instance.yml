@@ -1,14 +1,42 @@
 ---
-- name: Configure Ubuntu Server
-  hosts: example_instances
+- name: Configure Apache server and deploy website
+  hosts: example_instance
   become: true
+  vars:
+    project_root: /var/www/html
+
   tasks:
-    - name: Update packages
+    - name: Update package repositories
       apt:
         update_cache: yes
-        upgrade: dist
 
-    - name: Install nginx
+    - name: Install Apache Webserver
       apt:
-        name: nginx
+        name: apache2
+        state: latest
+
+    - name: Download zip file
+      get_url:
+        url: "https://www.tooplate.com/zip-templates/2131_wedding_lite.zip"
+        dest: "/tmp/2131_wedding_lite.zip"
+
+    - name: Install unzip
+      apt:
+        name: unzip
         state: present
+
+    - name: Unzip the downloaded file
+      command: unzip "/tmp/2131_wedding_lite.zip" -d "/var/www/html/"
+      args:
+        creates: "/var/www/html/2131_wedding_lite/"
+
+    - name: Enable Apache on system reboot
+      service:
+        name: apache2
+        enabled: yes
+      notify: restart apache
+  handlers:
+    - name: restart apache
+      service:
+        name: apache2
+        state: restarted
